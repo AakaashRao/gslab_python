@@ -1,9 +1,14 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import map
+from builtins import range
 import unittest
 import sys
 import os
 import re
 import mock
-from StringIO import StringIO
+from io import StringIO
 
 # Ensure that Python can find and load the GSLab libraries
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -118,7 +123,7 @@ class TestSizeWarning(unittest.TestCase):
         for keywords in expect_true:
             self.assertTrue(sw._is_subpath(**keywords))
         for keywords in expect_false:
-            print keywords
+            print(keywords)
             self.assertFalse(sw._is_subpath(**keywords))   
 
     @mock.patch('gslab_scons.size_warning.os.path.isfile')
@@ -186,8 +191,8 @@ class TestSizeWarning(unittest.TestCase):
         self.assertEqual(len(sizes), 3)
 
         # Check that root_file.txt and test.pdf are in the dictionary
-        root_path = [k for k in sizes.keys() if re.search('root_file.txt$', k)]
-        pdf_path  = [k for k in sizes.keys() if re.search('test.pdf$', k)]
+        root_path = [k for k in list(sizes.keys()) if re.search('root_file.txt$', k)]
+        pdf_path  = [k for k in list(sizes.keys()) if re.search('test.pdf$', k)]
         self.assertTrue(len(root_path) > 0)
         self.assertTrue(len(pdf_path) > 0)
 
@@ -198,7 +203,7 @@ class TestSizeWarning(unittest.TestCase):
         # Check when two directories are provided
         sizes = sw.create_size_dictionary(['test_files', 'release'])
         self.assertEqual(len(sizes), 4)
-        path = [k for k in sizes.keys() if re.search('output.txt$', k)]
+        path = [k for k in list(sizes.keys()) if re.search('output.txt$', k)]
         self.assertTrue(len(path) > 0)
         self.assertEqual(sizes[path[0]], 16)
 
@@ -270,7 +275,7 @@ def check_ignored_side_effect(ignored = 'standard'):
             message = ''.join(standard)
 
         command = args[0]
-        if 'shell' in kwargs.keys():
+        if 'shell' in list(kwargs.keys()):
             if kwargs['shell'] and (command == 'git status --ignored'):
                 return message
     
@@ -290,16 +295,16 @@ def make_walk_side_effect(test_type):
         path = os.path.relpath(path)
     
         if test_type == 'list_ignored_files':
-            if path not in struct.keys():
+            if path not in list(struct.keys()):
                 raise StopIteration
       
             # os.walk() generates a 3-tuple for each directory under the path passed
             # as its argument. The tuple is:
             #   (directory, [subdirectories], [files in root of directory])
             # Below, roots are the directories, `directories` is
-            roots       = struct.keys()
-            directories = map(lambda r: [d for d in roots if \
-                                         sw._is_subpath(d, r) and d != r], roots)
+            roots       = list(struct.keys())
+            directories = [[d for d in roots if \
+                                         sw._is_subpath(d, r) and d != r] for r in roots]
             files       = [struct[r] for r in roots]
 
         elif test_type == 'create_size_dictionary':
@@ -323,7 +328,7 @@ def isdir_ignored_side_effect(*args, **kwargs):
     if path == '':
         return False
         
-    isdir = (os.path.relpath(path) in struct.keys())
+    isdir = (os.path.relpath(path) in list(struct.keys()))
     return isdir
 
 
@@ -334,10 +339,10 @@ def isfile_ignored_side_effect(*args, **kwargs):
 
     file_list = []
 
-    for k in struct.keys():
+    for k in list(struct.keys()):
         file_list += [os.path.join(k, f) for f in struct[k]]
 
-    isfile = (os.path.relpath(path) in map(os.path.relpath, file_list))
+    isfile = (os.path.relpath(path) in list(map(os.path.relpath, file_list)))
     return isfile
 
 

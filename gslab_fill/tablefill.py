@@ -1,11 +1,15 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
 import os
 import argparse
 import types
 import re
 import traceback
-import tablefill_info
+from . import tablefill_info
 from decimal import Decimal, ROUND_HALF_UP
 
 
@@ -16,12 +20,12 @@ def tablefill(**kwargs):
         lyx_text = insert_tables(args, tables)
         write_to_lyx(args, lyx_text)
         exitmessage = args['template'] + ' filled successfully by tablefill'
-        print exitmessage
+        print(exitmessage)
         return exitmessage    
     except:
-        print 'Error Found'
+        print('Error Found')
         exitmessage = traceback.format_exc()
-        print exitmessage
+        print(exitmessage)
         return exitmessage
 
 # Set tablefill's docstring as the text in "tablefill_info.py"
@@ -29,12 +33,12 @@ tablefill.__doc__ = tablefill_info.__doc__
 
 def parse_arguments(kwargs):
     args = dict()
-    if 'input' in kwargs.keys():
+    if 'input' in list(kwargs.keys()):
         input_list = kwargs['input'].split()
         args['input'] = input_list
-    if 'template' in kwargs.keys():
+    if 'template' in list(kwargs.keys()):
         args['template'] = kwargs['template']
-    if 'output' in kwargs.keys():
+    if 'output' in list(kwargs.keys()):
         args['output'] = kwargs['output']        
     
     return args
@@ -49,7 +53,7 @@ def parse_tables(args):
 
 def read_data(input):
     data = []
-    if isinstance(input, types.StringTypes):
+    if isinstance(input, (str,)):
         input = [input]
     for file in input:
         data += open(file, 'rU').readlines()
@@ -72,7 +76,7 @@ def parse_data(data):
         for n in range( len(tables[table_tag]) ):
             clean_entry = tables[table_tag][n].strip()
             tables[table_tag][n] = clean_entry
-        tables[table_tag] = filter(lambda a: a != '.' and a != '', tables[table_tag])
+        tables[table_tag] = [a for a in tables[table_tag] if a != '.' and a != '']
         
     return tables    
     

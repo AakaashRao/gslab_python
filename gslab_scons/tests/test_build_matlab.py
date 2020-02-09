@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import unittest
 import sys
 import os
@@ -5,8 +6,8 @@ import shutil
 import mock
 import re
 # Import gslab_scons testing helper modules
-import _test_helpers as helpers
-import _side_effects as fx
+from . import _test_helpers as helpers
+from . import _side_effects as fx
 
 sys.path.append('../..')
 import gslab_scons as gs

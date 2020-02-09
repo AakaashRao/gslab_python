@@ -6,6 +6,7 @@ gslab_fill provides two functions for filling LyX template files with data.
 These are `tablefill` and `textfill`. Please see their docstrings for informations
 on their use and functionalities.
 '''
+from __future__ import absolute_import
 
-from tablefill import tablefill
-from textfill import textfill
+from .tablefill import tablefill
+from .textfill import textfill

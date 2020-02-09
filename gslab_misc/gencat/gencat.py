@@ -1,11 +1,13 @@
 #!/usr/bin/env python
+from builtins import object
 import os
 import shutil
 import zipfile
 import zlib
 from abc import ABCMeta, abstractmethod
+from future.utils import with_metaclass
 
-class gencat(object):
+class gencat(with_metaclass(ABCMeta, object)):
     '''
     Tool for concatenating text files stored in .zip files
 
@@ -21,8 +23,6 @@ class gencat(object):
         - path_out: the path to the directory to which a gencat object will save
             its final output. 
     '''
-
-    __metaclass__ = ABCMeta
     
     def __init__(self, path_in, path_temp, path_out):
         self.path_in = os.path.join(path_in, '')
@@ -126,7 +126,7 @@ class gencat(object):
         Places NEWFILE\nFILENAME: <original filename> before each new file in the concatenation.
         Stores all concatenated files to .zip file(s) with ZIP64 compression in path_out.
         '''
-        for zip_key in self.zip_dict.keys():
+        for zip_key in list(self.zip_dict.keys()):
             catdirpath = os.path.join(self.path_temp, zip_key, '')
             os.makedirs(catdirpath)
             inzippath = os.path.join('..', zip_key, '')

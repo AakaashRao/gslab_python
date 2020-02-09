@@ -1,11 +1,15 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
 import os
 import argparse
 import types
 import traceback
-import textfill_info
-from HTMLParser import HTMLParser, HTMLParseError
+from . import textfill_info
+from html.parser import HTMLParser, HTMLParseError
 
 
 def textfill(**kwargs):
@@ -14,13 +18,13 @@ def textfill(**kwargs):
         text = parse_text(args)
         insert_text(args, text)
         exitmessage = args['template'] + ' filled successfully by textfill'
-        print exitmessage
+        print(exitmessage)
         return exitmessage	
         
     except:
-        print 'Error Found'
+        print('Error Found')
         exitmessage = traceback.format_exc()
-        print exitmessage
+        print(exitmessage)
         return exitmessage    
 
 # Set textfill's docstring as the text in "textfill_info.py"
@@ -29,22 +33,22 @@ textfill.__doc__ = textfill_info.__doc__
 
 def parse_arguments(kwargs):
     args = dict()
-    if 'input' in kwargs.keys():
+    if 'input' in list(kwargs.keys()):
         input_list = kwargs['input'].split()
         args['input'] = input_list
-    if 'template' in kwargs.keys():
+    if 'template' in list(kwargs.keys()):
         args['template'] = kwargs['template']
-    if 'output' in kwargs.keys():
+    if 'output' in list(kwargs.keys()):
         args['output'] = kwargs['output'] 
-    if 'remove_echoes' in kwargs.keys():
+    if 'remove_echoes' in list(kwargs.keys()):
         args['remove_echoes'] = kwargs['remove_echoes']
     else:
         args['remove_echoes'] = False
-    if 'size' in kwargs.keys():
+    if 'size' in list(kwargs.keys()):
         args['size'] = kwargs['size']
     else:
         args['size'] = 'Default'
-    if 'prefix' in kwargs.keys():
+    if 'prefix' in list(kwargs.keys()):
         args['prefix'] = kwargs['prefix'] + "_"
     else:
         args['prefix'] = 'textfill_'
@@ -61,7 +65,7 @@ def parse_text(args):
 
 def read_text(input, prefix):
     data = ''
-    if isinstance(input, types.StringTypes):
+    if isinstance(input, (str,)):
         input = [input]
     for file in input:
         data += open(file, 'rU').read()
@@ -101,7 +105,7 @@ class text_parser(HTMLParser):
                 self.recording = False
     
     def close(self):
-        for tag in self.results.keys():
+        for tag in list(self.results.keys()):
             if tag not in self.closed:
                 raise HTMLParseError('Tag %s is not closed' % tag)
 
@@ -110,9 +114,9 @@ def clean_text(text, remove_echoes):
     for key in text.results:
         data = text.results[key].split('\n')
         if remove_echoes:
-            data = filter(lambda x: not x.startswith('.'), data)
+            data = [x for x in data if not x.startswith('.')]
         else:
-            data = filter(lambda x: not x.startswith('. insert_tag'), data)
+            data = [x for x in data if not x.startswith('. insert_tag')]
         data = remove_trailing_leading_blanklines(data)
         text.results[key] = '\n'.join(data)
     

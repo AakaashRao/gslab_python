@@ -1,12 +1,15 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
 import os
 import re
 import datetime
-import private.metadata as metadata
+from . import private.metadata as metadata
 
-from make_log import make_stats_log, make_heads_log
-from private.linkslist import LinksList
+from .make_log import make_stats_log, make_heads_log
+from .private.linkslist import LinksList
 
 
 def make_link_logs (links_files,
@@ -87,7 +90,7 @@ def make_link_orig_log (link_logs_dir, link_orig_file, links_dict):
         return
     
     # Return if the links_dict is empty
-    num_links = len(links_dict.keys())
+    num_links = len(list(links_dict.keys()))
     if num_links == 0:
         return
         
@@ -99,10 +102,10 @@ def make_link_orig_log (link_logs_dir, link_orig_file, links_dict):
     if not os.path.isdir(os.path.dirname(link_orig_path)):
         os.makedirs(os.path.dirname(link_orig_path))
     ORIGFILE = open(link_orig_path, 'w+')
-    print >> ORIGFILE, header  
+    print(header, file=ORIGFILE)  
 
-    links_dict_it = iter(sorted(links_dict.iteritems()))
+    links_dict_it = iter(sorted(links_dict.items()))
     for i in range(num_links):
-        print >> ORIGFILE, "%s\t%s" % links_dict_it.next()
+        print("%s\t%s" % next(links_dict_it), file=ORIGFILE)
         
       

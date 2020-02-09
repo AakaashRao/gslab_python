@@ -1,11 +1,13 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
 import os
-import private.preliminaries as prelim
-import private.metadata as metadata
-import private.messages as messages
+from . import private.preliminaries as prelim
+from . import private.metadata as metadata
+from . import private.messages as messages
 
-from private.getexternalsdirectives import SystemDirective
+from .private.getexternalsdirectives import SystemDirective
 
 def get_externals(externals_file,
                   external_dir = '@DEFAULTVALUE@',
@@ -95,4 +97,4 @@ def get_externals(externals_file,
         prelim.end_logging(LOGFILE, makelog, 'get_externals.py')
 
     except Exception as errmsg:
-        print "Error with get_external: \n", errmsg
+        print("Error with get_external: \n", errmsg)

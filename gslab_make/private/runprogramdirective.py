@@ -1,22 +1,26 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import object
 import os
 import re
 import shutil
 import subprocess
 
-from exceptionclasses import CustomError, CritError, SyntaxError, LogicError
-import messages as messages
-import metadata as metadata
+from .exceptionclasses import CustomError, CritError, SyntaxError, LogicError
+from . import messages as messages
+from . import metadata as metadata
 
 
 class RunProgramDirective(object):
 
     def __init__(self, kwargs, program_bool = True):
-        dict((k.lower(), v) for k, v in kwargs.iteritems())
+        dict((k.lower(), v) for k, v in kwargs.items())
 
         if program_bool:
-            if 'program' in kwargs.keys():
+            if 'program' in list(kwargs.keys()):
                 program_input = kwargs['program']
                 self.program_path = os.path.dirname(program_input)
                 program_base = os.path.basename(program_input)
@@ -29,14 +33,14 @@ class RunProgramDirective(object):
         else:
             self.program_ext = ''
 
-        if 'makelog' in kwargs.keys():
+        if 'makelog' in list(kwargs.keys()):
             self.makelog = kwargs['makelog']
             if self.makelog:
                 self.makelog = os.path.abspath( self.makelog )
         else:
             self.makelog = os.path.abspath( metadata.settings['makelog_file'] )
 
-        if 'option' in kwargs.keys():
+        if 'option' in list(kwargs.keys()):
             self.option = kwargs['option']
             self.option_dict = self.parse_options()
             self.option_overlap_error_check(kwargs)
@@ -44,42 +48,42 @@ class RunProgramDirective(object):
             self.option = '';
             self.option_dict = {}
 
-        if 'log' in kwargs.keys():
+        if 'log' in list(kwargs.keys()):
             self.log = os.path.abspath( kwargs['log'] )
         else:
             self.log = self.option_assigned('log', '')
 
-        if 'lst' in kwargs.keys():
+        if 'lst' in list(kwargs.keys()):
             self.lst = os.path.abspath( kwargs['lst'] )
         else:
             self.lst = self.option_assigned('lst', metadata.settings['output_dir'])
 
-        if 'changedir' in kwargs.keys():
+        if 'changedir' in list(kwargs.keys()):
             self.changedir = kwargs['changedir']
         else:
             self.changedir = False
 
-        if 'executable' in kwargs.keys():
+        if 'executable' in list(kwargs.keys()):
             self.executable = kwargs['executable']
         else:
             self.executable = '';
 
-        if 'args' in kwargs.keys():
+        if 'args' in list(kwargs.keys()):
             self.args = kwargs['args']
         else:
             self.args = '';
 
-        if 'handout' in kwargs.keys():
+        if 'handout' in list(kwargs.keys()):
             self.handout = kwargs['handout']
         else:
             self.handout = False
             
-        if 'comments' in kwargs.keys():
+        if 'comments' in list(kwargs.keys()):
             self.comments = kwargs['comments']
         else:
             self.comments = False
             
-        if 'pdfout' in kwargs.keys():
+        if 'pdfout' in list(kwargs.keys()):
             self.pdfout = os.path.abspath( kwargs['pdfout'] )
         else:
             pdfout_dir = ''
@@ -108,11 +112,11 @@ class RunProgramDirective(object):
 
 
     def option_overlap_error_check(self, kwargs):
-        prog = [prog for prog, ext in metadata.extensions.iteritems() if ext == self.program_ext][0]
+        prog = [prog for prog, ext in metadata.extensions.items() if ext == self.program_ext][0]
         option_overlaps = metadata.option_overlaps.get(prog)
         if not option_overlaps: return
         for opt in option_overlaps:
-            if self.option_dict.has_key(option_overlaps[opt]) and kwargs.has_key(opt):
+            if option_overlaps[opt] in self.option_dict and opt in kwargs:
                 raise CritError(messages.crit_error_option_overlap
                                 % (opt, option_overlaps[opt]))
 
@@ -120,14 +124,14 @@ class RunProgramDirective(object):
     def option_assigned(self, option, default):
         assigned_value = default
 
-        prog = [prog for prog, ext in metadata.extensions.iteritems() if ext == self.program_ext][0]
+        prog = [prog for prog, ext in metadata.extensions.items() if ext == self.program_ext][0]
         option_overlaps = metadata.option_overlaps.get(prog)
         if option_overlaps:
             replace_option = option_overlaps.get(option)
             if replace_option:
                 value = self.option_dict.get(replace_option)
                 if value:
-                    print messages.note_option_replaced % (replace_option, option)
+                    print(messages.note_option_replaced % (replace_option, option))
                     del self.option_dict[replace_option]
                     assigned_value = value
 
@@ -135,10 +139,10 @@ class RunProgramDirective(object):
 
 
     def update_option(self):
-        prog = [prog for prog, ext in metadata.extensions.iteritems() if ext == self.program_ext][0]
-        if prog in metadata.option_overlaps.keys():
+        prog = [prog for prog, ext in metadata.extensions.items() if ext == self.program_ext][0]
+        if prog in list(metadata.option_overlaps.keys()):
             option = ''
-            for opt, arg in self.option_dict.iteritems():
+            for opt, arg in self.option_dict.items():
                 option += str(opt + ' ' + arg + ' ')
             return option
         else:
@@ -164,7 +168,7 @@ class RunProgramDirective(object):
 
 
     def execute_run(self, command):
-        print '\n'
+        print('\n')
         current_directory = os.getcwd()
 
         if self.changedir:
@@ -184,13 +188,13 @@ class RunProgramDirective(object):
             try:
                 LOGFILE = open(self.makelog, 'ab')
             except Exception as errmsg:
-                print errmsg
+                print(errmsg)
                 raise CritError(messages.crit_error_log % self.makelog)
 
             try:
             # Execute command and print content to LOGFILE
-                print 'Executing: ', command
-                print >>LOGFILE, '\n\nExecute: ', command
+                print('Executing: ', command)
+                print('\n\nExecute: ', command, file=LOGFILE)
                 subprocess.check_call(command, shell = True, stdout = TEMPFILE, stderr = TEMPFILE)
                 TEMPFILE.close()
                 LOGFILE.write(open(tempname, 'rU').read())
@@ -199,20 +203,20 @@ class RunProgramDirective(object):
             # If fails then print errors to LOGFILE
                 TEMPFILE.close()
                 LOGFILE.write(open(tempname, 'rU').read())
-                print messages.crit_error_bad_command % command, '\n', str(errmsg)
-                print >> LOGFILE, messages.crit_error_bad_command % command, '\n', str(errmsg)
+                print(messages.crit_error_bad_command % command, '\n', str(errmsg))
+                print(messages.crit_error_bad_command % command, '\n', str(errmsg), file=LOGFILE)
                 LOGFILE.close()
         else:
             try:
             # Execute command
-                print 'Executing: ', command
+                print('Executing: ', command)
                 subprocess.check_call(command, shell = True, stdout = TEMPFILE, stderr = TEMPFILE)
                 TEMPFILE.close()
             except Exception as errmsg:
             # If fails then print errors
                 TEMPFILE.close()
-                print messages.crit_error_bad_command % command, '\n', str(errmsg)
-                print >> TEMPFILE, messages.crit_error_bad_command % command, '\n', str(errmsg)
+                print(messages.crit_error_bad_command % command, '\n', str(errmsg))
+                print(messages.crit_error_bad_command % command, '\n', str(errmsg), file=TEMPFILE)
 
         if not self.log:
             os.remove(tempname)
@@ -230,7 +234,7 @@ class RunProgramDirective(object):
                 try:
                     LOGFILE.write(open(default_log, 'rU').read())
                 except Exception as errmsg:
-                    print errmsg
+                    print(errmsg)
                     raise CritError(messages.crit_error_no_file % default_log)
                 LOGFILE.close()
 
@@ -253,7 +257,7 @@ class RunProgramDirective(object):
                 try:
                     LOGFILE.write(open(default_lst, 'rU').read())
                 except Exception as errmsg:
-                    print errmsg
+                    print(errmsg)
                     raise CritError(messages.crit_error_no_file % default_lst)
                 LOGFILE.close()
 
@@ -270,13 +274,13 @@ class RunRPackageDirective(RunProgramDirective):
     def __init__(self, kwargs, program_bool = False):
         RunProgramDirective.__init__(self, kwargs, program_bool)
 
-        if 'package' in kwargs.keys():
+        if 'package' in list(kwargs.keys()):
             self.package = kwargs['package']
             self.package = re.sub('\\\\', '/', self.package)
         else:
             raise SyntaxError(messages.syn_error_nopackage)
 
-        if 'lib' in kwargs.keys():
+        if 'lib' in list(kwargs.keys()):
             self.lib = '-l ' + kwargs['lib']
         else:
             self.lib = ''
@@ -295,7 +299,7 @@ class RunCommandDirective(RunProgramDirective):
     def __init__(self, kwargs, program_bool = False):
         RunProgramDirective.__init__(self, kwargs, program_bool)
 
-        if 'command' in kwargs.keys():
+        if 'command' in list(kwargs.keys()):
             self.command = kwargs['command']
             self.command = re.sub('\\\\', '/', self.command)
         else:

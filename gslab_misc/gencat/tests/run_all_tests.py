@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
 import unittest
 
 loader = unittest.TestLoader()
@@ -10,6 +11,6 @@ with open('./log/make.log', 'wb') as log:
     testRunner.run(tests)
 
 with open('./log/make.log', 'rU') as log:
-    print '\n=== Test results ' + '='*53
-    print log.read()
+    print('\n=== Test results ' + '='*53)
+    print(log.read())
 

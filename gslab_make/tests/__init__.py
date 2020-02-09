@@ -7,5 +7,6 @@ or
 from `gslab_make/tests/`. The latter command stores the test 
 results in `gslab_make/tests/log/make.log`.
 '''
+from __future__ import absolute_import
 
-from nostderrout import nostderrout
+from .nostderrout import nostderrout

@@ -1,4 +1,8 @@
 #! /usr/bin/env python
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
 import sys
 import subprocess
 import shutil
@@ -7,11 +11,11 @@ import datetime
 import re
 import string
 
-import private.messages as messages
-import private.metadata as metadata
-from private.preliminaries import print_error, files_list
-from dir_mod import delete_files, list_directory
-from private.exceptionclasses import CustomError, CritError, SyntaxError, LogicError
+from . import private.messages as messages
+from . import private.metadata as metadata
+from .private.preliminaries import print_error, files_list
+from .dir_mod import delete_files, list_directory
+from .private.exceptionclasses import CustomError, CritError, SyntaxError, LogicError
 
 #== Set default options ==============================
 
@@ -33,9 +37,9 @@ def set_option(**kwargs):
     """
 
     try:
-        dict((k.lower(), v) for k, v in kwargs.iteritems())
+        dict((k.lower(), v) for k, v in kwargs.items())
 
-        keylist = metadata.settings.keys()
+        keylist = list(metadata.settings.keys())
         
         file_keylist = [ k for k in keylist if k.endswith('file') ]
         dir_keylist = [ k for k in keylist if k.endswith('dir') ]
@@ -43,24 +47,24 @@ def set_option(**kwargs):
         # filekey or filekey without "_file" should both work
         n = len("_file")
         for filekey in file_keylist:
-            if filekey in kwargs.keys():
+            if filekey in list(kwargs.keys()):
                 metadata.settings[filekey] = kwargs[filekey]
-                if filekey[:-n] in kwargs.keys():
+                if filekey[:-n] in list(kwargs.keys()):
                     raise SyntaxError( messages.syn_error_dupkeys % (filekey, filekey[:-n]) )
-            elif filekey[:-n] in kwargs.keys():
+            elif filekey[:-n] in list(kwargs.keys()):
                 metadata.settings[filekey] = kwargs[filekey[:-n]]
 
         # dirkey or dirkey without "_dir" should both work
         n = len("_dir")
         for dirkey in dir_keylist:
-            if dirkey in kwargs.keys():
+            if dirkey in list(kwargs.keys()):
                 metadata.settings[dirkey] = kwargs[dirkey]
-                if dirkey[:-n] in kwargs.keys():
+                if dirkey[:-n] in list(kwargs.keys()):
                     raise SyntaxError( messages.syn_error_dupkeys % (dirkey, dirkey[:-n]) )
-            elif dirkey[:-n] in kwargs.keys():
+            elif dirkey[:-n] in list(kwargs.keys()):
                 metadata.settings[dirkey] = kwargs[dirkey[:-n]]
     except Exception as errmsg:
-        print "Error with set_option: \n", errmsg
+        print("Error with set_option: \n", errmsg)
 
 
 #== Logging ==========================================
@@ -79,7 +83,7 @@ def start_make_logging(makelog = '@DEFAULTVALUE@'):
 
     metadata.makelog_started = True
 
-    print "\nStart log file: ", makelog
+    print("\nStart log file: ", makelog)
 
     makelog = re.sub('\\\\', '/', makelog)
 
@@ -93,11 +97,11 @@ def start_make_logging(makelog = '@DEFAULTVALUE@'):
         time_begin = datetime.datetime.now().replace(microsecond = 0)
         sys.stderr = LOGFILE
         working_dir = os.getcwd()
-        print >> LOGFILE, messages.note_makelogstart, time_begin, working_dir, '\n\n'
+        print(messages.note_makelogstart, time_begin, working_dir, '\n\n', file=LOGFILE)
 
         LOGFILE.close()
     except Exception as errmsg:
-        print "Error with start_make_logging: \n", errmsg
+        print("Error with start_make_logging: \n", errmsg)
 
 
 def end_make_logging(makelog = '@DEFAULTVALUE@'):
@@ -116,7 +120,7 @@ def end_make_logging(makelog = '@DEFAULTVALUE@'):
     if not (metadata.makelog_started and os.path.isfile(makelog)):
         raise CritError(messages.crit_error_nomakelog % makelog)
 
-    print "\nEnd log file: ", makelog
+    print("\nEnd log file: ", makelog)
 
     makelog = re.sub('\\\\', '/', makelog)
     try:
@@ -124,7 +128,7 @@ def end_make_logging(makelog = '@DEFAULTVALUE@'):
     except Exception as errmsg:
         raise CritError((messages.crit_error_log % makelog) + '\n' + str(errmsg))
     time_end = datetime.datetime.now().replace(microsecond = 0)
-    print >> LOGFILE, messages.note_makelogend, time_end
+    print(messages.note_makelogend, time_end, file=LOGFILE)
     LOGFILE.close()
 
 
@@ -143,7 +147,7 @@ def add_log(*args, **kwargs):
      `add_log('../output/analysis.log', '../output/another_log.log', makelog = '../different.log')`
     """
 
-    if 'makelog' in kwargs.keys():
+    if 'makelog' in list(kwargs.keys()):
         makelog = kwargs['makelog']
     else:
         makelog = metadata.settings['makelog_file']
@@ -151,7 +155,7 @@ def add_log(*args, **kwargs):
     if not (metadata.makelog_started and os.path.isfile(makelog)):
         raise CritError(messages.crit_error_nomakelog % makelog)
 
-    print "\nAdd log file(s) to: ", makelog
+    print("\nAdd log file(s) to: ", makelog)
 
     makelog = re.sub('\\\\', '/', makelog)
     try:
@@ -163,7 +167,7 @@ def add_log(*args, **kwargs):
         for log in args:
             log = re.sub('\\\\', '/', log)
             if not os.path.isfile(log):
-                print >> LOGFILE, messages.note_nofile % log
+                print(messages.note_nofile % log, file=LOGFILE)
             else:
                 LOGFILE.write(open(log, 'rU').read())
     except:
@@ -188,7 +192,7 @@ def del_log(*args, **kwargs):
                makelog = '../different.log')`
     """
 
-    if 'makelog' in kwargs.keys():
+    if 'makelog' in list(kwargs.keys()):
         makelog = kwargs['makelog']
     else:
         makelog = metadata.settings['makelog_file']
@@ -196,7 +200,7 @@ def del_log(*args, **kwargs):
     if not (metadata.makelog_started and os.path.isfile(makelog)):
         raise CritError(messages.crit_error_nomakelog % makelog)
 
-    print "\nDelete log file(s)"
+    print("\nDelete log file(s)")
 
     makelog = re.sub('\\\\', '/', makelog)
     try:
@@ -210,7 +214,7 @@ def del_log(*args, **kwargs):
             if os.path.isfile(log):
                 os.remove(log)
             else:
-                print >> LOGFILE, messages.note_nofile % log
+                print(messages.note_nofile % log, file=LOGFILE)
     except:
         print_error(LOGFILE)
 
@@ -286,14 +290,14 @@ def make_stats_log (output_dir, stats_file, all_files):
     if not os.path.isdir(os.path.dirname(stats_path)):
         os.makedirs(os.path.dirname(stats_path))
     STATSFILE = open(stats_path, 'w+')
-    print >> STATSFILE, header        
+    print(header, file=STATSFILE)        
 
     for file_name in all_files:
         stats = os.stat(file_name)
         last_mod = datetime.datetime.utcfromtimestamp(round(stats.st_mtime))
         file_size = stats.st_size
 
-        print >> STATSFILE, "%s\t%s\t%s" % (file_name, last_mod, file_size)
+        print("%s\t%s\t%s" % (file_name, last_mod, file_size), file=STATSFILE)
     STATSFILE.close()
 
 
@@ -320,26 +324,26 @@ def make_heads_log (output_dir, heads_file, all_files, head_lines = 10):
     if not os.path.isdir(os.path.dirname(heads_path)):
         os.makedirs(os.path.dirname(heads_path))
     HEADSFILE = open(heads_path, 'w+')
-    print >> HEADSFILE, header
-    print >> HEADSFILE, "\n%s\n" % ("-" * 65)        
+    print(header, file=HEADSFILE)
+    print("\n%s\n" % ("-" * 65), file=HEADSFILE)        
     
     for file_name in all_files:
-        print >> HEADSFILE, "%s\n" % file_name
+        print("%s\n" % file_name, file=HEADSFILE)
         try:
             f = open(file_name)
         except:
             f = False
-            print >> HEADSFILE, "Head not readable"
+            print("Head not readable", file=HEADSFILE)
         
         if f:       
             for i in range(head_lines):
                 try:
                     line = f.next().strip()
-                    cleaned_line = filter(lambda x: x in string.printable, line)
-                    print >> HEADSFILE, cleaned_line
+                    cleaned_line = [x for x in line if x in string.printable]
+                    print(cleaned_line, file=HEADSFILE)
                 except:
                     break
 
-        print >> HEADSFILE, "\n%s\n" % ("-" * 65)
+        print("\n%s\n" % ("-" * 65), file=HEADSFILE)
             
     HEADSFILE.close()

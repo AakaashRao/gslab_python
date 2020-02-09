@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
 import sys
 import os
 import datetime
@@ -7,10 +10,10 @@ import re
 import traceback
 import shutil
 
-import messages as messages
-import metadata as metadata
+from . import messages as messages
+from . import metadata as metadata
 
-from exceptionclasses import CustomError, CritError
+from .exceptionclasses import CustomError, CritError
 
 #== Logging ===============================================
 def start_logging(log, logtype):
@@ -22,12 +25,12 @@ def start_logging(log, logtype):
     orig_stderr = sys.stderr
     sys.stderr = LOGFILE
     working_dir = os.getcwd()
-    print >> LOGFILE, messages.note_logstart % logtype, time_begin, working_dir
+    print(messages.note_logstart % logtype, time_begin, working_dir, file=LOGFILE)
     return LOGFILE
 
 def end_logging(LOGFILE, makelog, logtype):
     time_end = datetime.datetime.now().replace(microsecond=0)
-    print >> LOGFILE, messages.note_logend % logtype,time_end
+    print(messages.note_logend % logtype,time_end, file=LOGFILE)
     LOGFILE.close()
     if not makelog: return
     if not (metadata.makelog_started and os.path.isfile(makelog)):
@@ -57,9 +60,9 @@ def input_to_array(filename):
     
 #== Print error ===========================================
 def print_error(LOGFILE):
-    print '\n'
-    print >> LOGFILE, '\n'
-    print 'Error Found'
+    print('\n')
+    print('\n', file=LOGFILE)
+    print('Error Found')
     traceback.print_exc(file = LOGFILE)        
     traceback.print_exc(file = sys.stdout)
     
@@ -151,7 +154,7 @@ def externals_preliminaries(makelog, externals_file, LOGFILE):
     if makelog == '@DEFAULTVALUE@':
         makelog = metadata.settings['makelog_file']
     if externals_file!='externals.txt':
-        print >> LOGFILE, messages.note_extfilename        
+        print(messages.note_extfilename, file=LOGFILE)        
     externals = input_to_array(externals_file)
 
     # Prepare last rev/dir variables

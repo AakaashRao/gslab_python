@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import abc
 import os
 import subprocess
@@ -5,12 +7,12 @@ import sys
 
 import gslab_scons.misc as misc
 from gslab_scons._exception_classes import ExecCallError, TargetNonexistenceError, BadExtensionError
+from future.utils import with_metaclass
 
-class GSLabBuilder(object):
+class GSLabBuilder(with_metaclass(abc.ABCMeta, object)):
     '''
     Abstract Base Class for custom GSLab SCons builders.
     '''
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, target, source, env, name = 'GSLab Builder', 
                  valid_extensions = [], exec_opts = ''):

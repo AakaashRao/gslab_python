@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import map
+from builtins import range
+from past.builtins import basestring
 import requests
 import getpass
 import re
@@ -8,7 +14,7 @@ import sys
 import shutil
 import subprocess
 
-from _exception_classes import ReleaseError
+from ._exception_classes import ReleaseError
 
 def release(vers, org, repo,
             DriveReleaseFiles = [],  
@@ -59,7 +65,7 @@ def release(vers, org, repo,
         message  = message + ("https://YOURTOKEN:@api.github.com/repos/%s/%s/releases \n" % (org, repo))
         message  = message + "The json looks like this:"
         print(message)
-        for (k,v) in payload.items():
+        for (k,v) in list(payload.items()):
             print(" '%s' : '%s' " % (k,v))
         raise requests.exceptions.HTTPError
 
@@ -124,7 +130,7 @@ def release(vers, org, repo,
 
         if not zip_release:
             make_paths = lambda s: 'release/%s/%s/%s' % (dir_name, vers, s)
-            DriveReleaseFiles = map(make_paths, DriveReleaseFiles)
+            DriveReleaseFiles = list(map(make_paths, DriveReleaseFiles))
 
         with open('drive_assets.txt', 'wb') as f:
             f.write('\n'.join([drive_header] + DriveReleaseFiles))
@@ -244,7 +250,7 @@ def extract_dot_git(path = '.git'):
                            (path, str(err)))
 
     # Clean each line of this file's contents
-    details = map(lambda s: s.strip(), details)
+    details = [s.strip() for s in details]
     
     # Search for the line specifying information for origin
     origin_line = [bool(re.search('\[remote "origin"\]', detail)) \

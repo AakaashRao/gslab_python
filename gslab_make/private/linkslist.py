@@ -1,11 +1,13 @@
 #! /usr/bin/env python
 
+from __future__ import absolute_import
+from builtins import object
 import os
 import re
 
-from linkdirectives import *
-from preliminaries import *
-import metadata as metadata
+from .linkdirectives import *
+from .preliminaries import *
+from . import metadata as metadata
 
 class LinksList(object):
 
@@ -53,7 +55,7 @@ class LinksList(object):
         for link in self.linkdirectives_list:
             links_dict = link.add_to_dict(links_dict)
         
-        links = links_dict.values()
+        links = list(links_dict.values())
         sorted_files = [ f for f in links if os.path.isfile(f) ]
         if recur_lim > 1:
             dirs = [ d for d in links if os.path.isdir(d) ]

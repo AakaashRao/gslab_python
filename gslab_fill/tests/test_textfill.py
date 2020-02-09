@@ -1,10 +1,13 @@
 #! /usr/bin/env python
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
 import unittest
 import sys
 import os
 import re
 import types
-import HTMLParser
+import html.parser
 import shutil
 
 sys.path.append('../..')
@@ -55,11 +58,11 @@ class testTextfill(unittest.TestCase):
         
         text = read_text(log, prefix)
         self.assertEqual( len(text.results),2 )
-        self.assertEqual(text.results.keys(), ['test_small', 'test_long'])
+        self.assertEqual(list(text.results.keys()), ['test_small', 'test_long'])
         
         for key in text.results:
             raw_table = text.results[key].split('\n')
-            raw_table = filter(lambda x: not x.startswith(log_remove_string), raw_table)
+            raw_table = [x for x in raw_table if not x.startswith(log_remove_string)]
             raw_table = remove_trailing_leading_blanklines(raw_table)
             for n in range( len(raw_table) ):
                 self.assertIn(raw_table[n], raw_lyx)

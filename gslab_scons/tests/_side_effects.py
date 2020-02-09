@@ -1,10 +1,12 @@
+from __future__ import absolute_import
+from builtins import map
 import os
 import re
 import mock
 import requests
 import shutil
 import subprocess
-import _test_helpers as helpers
+from . import _test_helpers as helpers
 
 def make_r_side_effect(recognized = True):
     '''
@@ -164,7 +166,7 @@ def lyx_side_effect(*args, **kwargs):
     # specified in the system command belongs to existing_files. 
     existing_files = ['test_script.lyx', './input/lyx_test_file.lyx']
     source_exists  = os.path.abspath(source) in \
-                         map(os.path.abspath, existing_files)
+                         list(map(os.path.abspath, existing_files))
 
     if is_lyx and option_type == '-e' and option_setting == 'pdf2' \
               and source_exists:
@@ -210,7 +212,7 @@ def latex_side_effect(*args, **kwargs):
     # specified in the system command belongs to existing_files.
     existing_files = ['test_script.tex', './input/latex_test_file.tex']
     source_exists  = os.path.abspath(source) in \
-                     map(os.path.abspath, existing_files)
+                     list(map(os.path.abspath, existing_files))
 
     if is_pdflatex and source_exists and option1_type == '-interaction' and option2_type == '-jobname':
         with open('%s.pdf' % target_file, 'wb') as out_file:

@@ -1,9 +1,11 @@
+from __future__ import absolute_import
+from builtins import str
 import sys
 import subprocess
 import pkg_resources
 
-import misc
-from _exception_classes import PrerequisiteError
+from . import misc
+from ._exception_classes import PrerequisiteError
 
 
 def check_prereq(prereq, manual_execs = {}, gslab_vers = None):

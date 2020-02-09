@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import unittest
 import sys
 import os
@@ -6,7 +8,7 @@ import mock
 import time
 import shutil
 # Import gslab_scons testing helpers
-import _test_helpers as helpers
+from . import _test_helpers as helpers
 
 # Ensure that Python can find and load the GSLab libraries
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -41,7 +43,7 @@ class TestLog(unittest.TestCase):
         test = "Test message"
         # Call start_log(), which redirects standard output to a log
         gs.start_log(mode = 'develop', vers = '')
-        print test
+        print(test)
         sys.stdout.close()
 
         # Restore the initial standard output
@@ -79,7 +81,7 @@ class TestLog(unittest.TestCase):
         test = "Test message"
 
         gs.start_log(mode = 'develop', vers = '')
-        print test
+        print(test)
         sys.stdout.close()
         sys.stdout = initial_stdout
 

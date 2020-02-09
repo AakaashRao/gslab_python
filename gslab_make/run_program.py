@@ -96,18 +96,20 @@ when compiling a lyx file using run_lyx().
       - [bool_handout] = True in which case '_handout' is appended to the name instead.
       - [string_pdfout] is used to specify the location of the pdf output. 
 '''
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 import shutil
 import fileinput
 
-import private.metadata as metadata
-import private.messages as messages
-from private.exceptionclasses import SyntaxError
-from private.runprogramdirective import (RunProgramDirective, 
+from . import private.metadata as metadata
+from . import private.messages as messages
+from .private.exceptionclasses import SyntaxError
+from .private.runprogramdirective import (RunProgramDirective, 
                                          RunCommandDirective, 
                                          RunRPackageDirective)
-from private.preliminaries import add_error_to_log
+from .private.preliminaries import add_error_to_log
 
 
 def run_stata(**kwargs):
@@ -364,7 +366,7 @@ def run_lyx(**kwargs):
                     line = line.rstrip('\n') + ', handout\n'
                 elif comments and r'\begin_inset Note Note' in line:
                     line = line.replace('Note Note', 'Note Greyedout')
-                print line,
+                print(line, end=' ')
         
         # Get executable
         executable = run.executable

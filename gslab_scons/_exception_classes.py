@@ -1,6 +1,7 @@
+from __future__ import print_function
 class ExecCallError(Exception):
 	def __init__(self, message = ''):
-		print 'Error: ' + message
+		print('Error: ' + message)
 
 class BadExtensionError(Exception):
     pass

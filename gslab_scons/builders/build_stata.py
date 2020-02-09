@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 import os
 import shutil
 import sys
 
 import gslab_scons.misc as misc
-from gslab_builder import GSLabBuilder
+from .gslab_builder import GSLabBuilder
 
 def build_stata(target, source, env):
     '''

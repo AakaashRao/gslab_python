@@ -1,19 +1,23 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
+from builtins import object
 import os
 import re
 import subprocess
 
-import messages as messages
-import metadata as metadata
-from exceptionclasses import SyntaxError, LogicError
+from . import messages as messages
+from . import metadata as metadata
+from .exceptionclasses import SyntaxError, LogicError
 
 class LinkDirectives(object):
 
     def __init__(self, line, links_dir):
         self.line = line.replace('    ','\t')
         list_line = ((self.line.split('\t')+[None])[:2])        
-        for i in xrange(len(list_line)):
+        for i in range(len(list_line)):
             list_line[i] = list_line[i].strip()
         local, link = list_line
         
@@ -104,7 +108,7 @@ class LinkDirectives(object):
     # Issue System Command
     def issue_sys_command(self, logfile, quiet):
         if self.flag_list:
-            print >> logfile, messages.note_array % self.LIST
+            print(messages.note_array % self.LIST, file=logfile)
             for element in self.LIST:
                 #Add prefix to localfile name (if none, then no change)
                 self.localfile = self.outprefix+element
@@ -137,8 +141,8 @@ class LinkDirectives(object):
         else:
             subprocess.check_call(command % options, shell=True)        
         
-        print >> logfile, messages.success_makelink % (self.linkeddir, self.linkedfile,
-                                                       self.localdir, self.localfile)
+        print(messages.success_makelink % (self.linkeddir, self.linkedfile,
+                                                       self.localdir, self.localfile), file=logfile)
                                                             
     def add_to_dict(self, links_dict):
         if self.flag_list:

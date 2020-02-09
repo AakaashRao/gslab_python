@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
 import os
 import time
 import traceback
@@ -9,11 +12,11 @@ import subprocess
 import zlib
 import zipfile
 
-import private.metadata as metadata
-import private.messages as messages
+from . import private.metadata as metadata
+from . import private.messages as messages
 from glob import glob
-from private.exceptionclasses import CustomError, CritError, SyntaxError, LogicError
-from private.preliminaries import print_error
+from .private.exceptionclasses import CustomError, CritError, SyntaxError, LogicError
+from .private.preliminaries import print_error
 
 
 #== Directory modification functions =================
@@ -25,7 +28,7 @@ def delete_files(pathname):
     `pathname` can be either absolute (like /usr/src/Python-1.5/Makefile) 
     or relative (like ../../Tools/*/*.gif). It can contain shell-style wildcards.
     """
-    print "\nDelete files", pathname
+    print("\nDelete files", pathname)
 
     for f in glob(pathname):
         os.remove(f)
@@ -73,13 +76,13 @@ def check_manifest(manifestlog = '@DEFAULTVALUE@',
     if makelog == '@DEFAULTVALUE@':
         makelog = metadata.settings['makelog_file']
 
-    print "\nCheck manifest log file", manifestlog
+    print("\nCheck manifest log file", manifestlog)
 
     # Open main log file
     try:
         LOGFILE = open(makelog, 'ab')
     except Exception as errmsg:
-        print errmsg
+        print(errmsg)
         raise CritError(messages.crit_error_log % makelog)
 
     try:
@@ -87,7 +90,7 @@ def check_manifest(manifestlog = '@DEFAULTVALUE@',
         try:
             MANIFESTFILE = open(manifestlog, 'rU')
         except Exception as errmsg:
-            print errmsg
+            print(errmsg)
             raise CritError(messages.crit_error_log % manifestlog)
         manifest_lines = MANIFESTFILE.readlines()
         MANIFESTFILE.close()
@@ -103,7 +106,7 @@ def check_manifest(manifestlog = '@DEFAULTVALUE@',
                         filepath = filepath + '.dta'
                     file_list.append( filepath )
         except Exception as errmsg:
-            print errmsg
+            print(errmsg)
             raise SyntaxError(messages.syn_error_manifest % manifestlog)
 
         if not os.path.isdir(output_dir):
@@ -124,21 +127,21 @@ def check_manifest(manifestlog = '@DEFAULTVALUE@',
                 fullpath = os.path.abspath( os.path.join(root, filename) )
                 # non-hidden .dta file: error
                 if (not filename.startswith('.')) and (ext == '.dta'):
-                    print 'Checking: ', fullpath
+                    print('Checking: ', fullpath)
                     if not (fullpath in file_list):
                         raise CritError(messages.crit_error_no_dta_file % (filename, manifestlog))
                 # non-hidden .csv file: warning
                 if (not filename.startswith('.')) and (ext == '.csv'):
-                    print 'Checking: ', fullpath
+                    print('Checking: ', fullpath)
                     if not (fullpath in file_list):
-                        print messages.note_no_csv_file % (filename, manifestlog)
-                        print >> LOGFILE, messages.note_no_csv_file % (filename, manifestlog)
+                        print(messages.note_no_csv_file % (filename, manifestlog))
+                        print(messages.note_no_csv_file % (filename, manifestlog), file=LOGFILE)
                 # non-hidden .txt file: warning
                 if (not filename.startswith('.')) and (ext == '.txt'):
-                    print 'Checking: ', fullpath
+                    print('Checking: ', fullpath)
                     if not (fullpath in file_list):
-                        print messages.note_no_txt_file % (filename, manifestlog)
-                        print >> LOGFILE, messages.note_no_txt_file % (filename, manifestlog)
+                        print(messages.note_no_txt_file % (filename, manifestlog))
+                        print(messages.note_no_txt_file % (filename, manifestlog), file=LOGFILE)
     except:
         print_error(LOGFILE)
 
@@ -159,7 +162,7 @@ def list_directory(top, makelog = '@DEFAULTVALUE@'):
     if makelog == '@DEFAULTVALUE@':
         makelog = metadata.settings['makelog_file']
 
-    print "\nList all files in directory", top
+    print("\nList all files in directory", top)
 
     # To print numbers (file sizes) with thousand separator
     locale.setlocale(locale.LC_ALL, '')
@@ -168,11 +171,11 @@ def list_directory(top, makelog = '@DEFAULTVALUE@'):
     try:
         LOGFILE = open(makelog, 'ab')
     except Exception as errmsg:
-        print errmsg
+        print(errmsg)
         raise CritError(messages.crit_error_log % makelog)
 
-    print >> LOGFILE, '\n'
-    print >> LOGFILE, 'List of all files in sub-directories in', top
+    print('\n', file=LOGFILE)
+    print('List of all files in sub-directories in', top, file=LOGFILE)
 
     try:
         if os.path.isdir(top):
@@ -187,8 +190,8 @@ def list_directory(top, makelog = '@DEFAULTVALUE@'):
                 # Print out the sub-directory and its time stamp
                 created = os.stat(root).st_mtime
                 asciiTime = time.asctime(time.localtime(created))
-                print >> LOGFILE, root
-                print >> LOGFILE, 'created/modified', asciiTime
+                print(root, file=LOGFILE)
+                print('created/modified', asciiTime, file=LOGFILE)
 
                 # Print out all the files in the sub-directories
                 for name in files:
@@ -196,12 +199,12 @@ def list_directory(top, makelog = '@DEFAULTVALUE@'):
                     created = os.path.getmtime(full_name)
                     size = os.path.getsize(full_name)
                     asciiTime = time.asctime(time.localtime(created))
-                    print >> LOGFILE, '%50s' % name, '--- created/modified', asciiTime, \
-                        '(', locale.format('%d', size, 1), 'bytes )'
+                    print('%50s' % name, '--- created/modified', asciiTime, \
+                        '(', locale.format('%d', size, 1), 'bytes )', file=LOGFILE)
     except:
         print_error(LOGFILE)
 
-    print >> LOGFILE, '\n'
+    print('\n', file=LOGFILE)
     LOGFILE.close()
 
 def clear_dirs(*args):
@@ -217,7 +220,7 @@ def clear_dirs(*args):
         if os.path.isdir(dir):
             remove_dir(dir)
         os.makedirs(dir)
-        print 'Cleared:', dir
+        print('Cleared:', dir)
 
 
 def unzip(file_name, output_dir):
@@ -244,7 +247,7 @@ def zip_dir(source_dir, dest):
         for filename in files:
             absname = os.path.abspath(os.path.join(dirname, filename))
             arcname = absname[len(abs_src) + 1:]
-            print 'zipping %s as %s' % (os.path.join(dirname, filename), arcname)
+            print('zipping %s as %s' % (os.path.join(dirname, filename), arcname))
             zf.write(absname, arcname)
     zf.close()
 

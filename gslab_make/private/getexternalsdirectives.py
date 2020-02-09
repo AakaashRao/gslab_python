@@ -1,14 +1,20 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
 import os
 import re
 import shutil 
 import subprocess
-import urlparse
+import urllib.parse
 
-import messages as messages
-import metadata as metadata
-from exceptionclasses import CustomError, CritError, SyntaxError, LogicError
+from . import messages as messages
+from . import metadata as metadata
+from .exceptionclasses import CustomError, CritError, SyntaxError, LogicError
 
 
 class SystemDirective(object):
@@ -25,11 +31,11 @@ class SystemDirective(object):
     def __init__(self, raw, LOGFILE, last_dir, last_rev, token = "@NONE@"):
         self.logfile = LOGFILE
         # Print raw input to logfile
-        print >> self.logfile, messages.note_input % raw
+        print(messages.note_input % raw, file=self.logfile)
         # Split columns
         self.raw = raw.replace('    ','\t')
         list = ((self.raw.split('\t')+[None])[:5])
-        for i in xrange(len(list)):
+        for i in range(len(list)):
             list[i] = list[i].strip()
         self.rev,self.dir,self.file,self.outdir,self.outfile = list
         # Load previous rev/dir if empty 
@@ -113,7 +119,7 @@ class SystemDirective(object):
             os.makedirs(self.outdir)
 
         if self.flag_list:
-            print >> self.logfile, messages.note_array % self.LIST
+            print(messages.note_array % self.LIST, file=self.logfile)
             for element in self.LIST:
                 #Add prefix to outfile name (if none, then no change)
                 self.outfile = self.outprefix+element
@@ -135,11 +141,11 @@ class GitHubDirective(SystemDirective):
     def __init__(self, raw, LOGFILE, last_dir, last_rev, token):
         self.logfile = LOGFILE
         # Print raw input to logfile
-        print >> self.logfile, messages.note_input % raw
+        print(messages.note_input % raw, file=self.logfile)
         # Split columns
         self.raw = raw.replace('    ','\t')
         list = ((self.raw.split('\t')+[None])[:3])
-        for i in xrange(len(list)):
+        for i in range(len(list)):
             list[i] = list[i].strip()
         self.url,self.outdir,self.outfile = list
         self.token = token
@@ -153,7 +159,7 @@ class GitHubDirective(SystemDirective):
     # Obtain asset id and create download url
     def get_asset_data(self):
         import requests
-        split_url   = urlparse.urlsplit(self.url)
+        split_url   = urllib.parse.urlsplit(self.url)
         path        = split_url.path
         path        = path.split("/")
         clean_path  = []
@@ -214,8 +220,8 @@ class GitHubDirective(SystemDirective):
             self.github_download()
         else:
             self.github_download()    
-            print >> self.logfile, messages.success_github % (self.paste_url, self.outdir, 
-                                                              self.outfile)
+            print(messages.success_github % (self.paste_url, self.outdir, 
+                                                              self.outfile), file=self.logfile)
     
     # Download Asset
     def github_download(self):
@@ -275,8 +281,8 @@ class SvnExportDirective(SystemDirective):
                                                                     self.rev, self.outdir, self.outfile), 
                                   shell = True)
 
-        print >> self.logfile, messages.success_svn % (self.dir, self.file, self.rev,
-                                                       self.outdir, self.outfile)
+        print(messages.success_svn % (self.dir, self.file, self.rev,
+                                                       self.outdir, self.outfile), file=self.logfile)
 
 
 
@@ -310,7 +316,7 @@ class CopyDirective(SystemDirective):
     def command(self, quiet):
         try:
             shutil.copy('%s%s' % (self.dir, self.file),'%s%s' % (self.outdir, self.outfile))
-            print >> self.logfile, messages.success_copy  % (self.dir, self.file, 
-                                                             self.outdir, self.outfile)
+            print(messages.success_copy  % (self.dir, self.file, 
+                                                             self.outdir, self.outfile), file=self.logfile)
         except:
             raise CritError(messages.crit_error_copyincomplete % (self.dir,self.file))

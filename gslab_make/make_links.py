@@ -1,11 +1,13 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 
-from dir_mod import remove_dir
-from private.linkslist import LinksList
-from private.preliminaries import start_logging, end_logging
-import private.metadata as metadata
+from .dir_mod import remove_dir
+from .private.linkslist import LinksList
+from .private.preliminaries import start_logging, end_logging
+from . import private.metadata as metadata
 
 def make_links (links_files,
                 links_dir = '@DEFAULTVALUE@',
@@ -75,4 +77,4 @@ def make_links (links_files,
         end_logging(LOGFILE, makelog, 'make_links.py')
     
     except Exception as errmsg:
-        print "Error with make_links: \n", errmsg                      
+        print("Error with make_links: \n", errmsg)                      

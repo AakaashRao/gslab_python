@@ -1,3 +1,4 @@
+from builtins import map
 import os
 import re
 import sys
@@ -9,8 +10,7 @@ from setuptools.command.install import install
 from glob import glob
  
 # Determine if the user has specified which paths to report coverage for
-is_include_arg = map(lambda x: bool(re.search('^--include=', x)), 
-                     sys.argv)
+is_include_arg = [bool(re.search('^--include=', x)) for x in sys.argv]
 
 if True in is_include_arg:
     include_arg = sys.argv[is_include_arg.index(True)]
@@ -48,9 +48,9 @@ class CleanRepo(build_py):
     def run(self):
         # i) Remove the .egg-info or .dist-info folders
         egg_directories = glob('./*.egg-info')
-        map(shutil.rmtree, egg_directories)
+        list(map(shutil.rmtree, egg_directories))
         dist_directories = glob('./*.dist-info')
-        map(shutil.rmtree, dist_directories)
+        list(map(shutil.rmtree, dist_directories))
         # ii) Remove the ./build and ./dist directories
         if os.path.isdir('./build'):
             shutil.rmtree('./build')

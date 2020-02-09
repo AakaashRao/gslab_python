@@ -1,9 +1,11 @@
+from __future__ import absolute_import
+from builtins import str
 import os
 import sys
 import scandir
 import pymmh3 as mmh3
 
-import misc
+from . import misc
 
 def log_paths_dict(d, record_key = 'input', nest_depth = 1, sep = ':', 
                   cl_args_list = sys.argv):
