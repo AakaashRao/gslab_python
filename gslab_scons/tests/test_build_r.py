@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-from __future__ import absolute_import
 import unittest
 import sys
 import os
@@ -7,8 +6,8 @@ import shutil
 import mock
 import re
 # Import gslab_scons testing helper modules
-from . import _test_helpers as helpers
-from . import _side_effects as fx
+import _test_helpers as helpers
+import _side_effects as fx
 
 # Ensure that Python can find and load the GSLab libraries
 os.chdir(os.path.dirname(os.path.realpath(__file__)))

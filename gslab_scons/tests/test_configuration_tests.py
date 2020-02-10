@@ -1,4 +1,3 @@
-from builtins import object
 import unittest
 import sys
 import os

@@ -1,11 +1,9 @@
-from __future__ import absolute_import
-from builtins import next
 import re
 import os
 import sys
-from . import _release_tools
-from ._exception_classes import ReleaseError
-from .misc import load_yaml_value, check_and_expand_path
+import _release_tools
+from _exception_classes import ReleaseError
+from misc import load_yaml_value, check_and_expand_path
 
 def main(version = None,
          user_yaml = 'config_user.yaml', 

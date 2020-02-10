@@ -1,8 +1,3 @@
-from __future__ import absolute_import
-from builtins import filter
-from builtins import input
-from builtins import str
-from builtins import map
 import os
 import re
 import sys
@@ -123,7 +118,7 @@ def load_yaml_value(path, key):
 
         except yaml.scanner.ScannerError:
             message = "%s is a corrupted yaml file. Delete file and recreate? (y/n) "
-            response = str(input(message % path))
+            response = str(raw_input(message % path))
             if response.lower() == 'y':
                 os.remove(path)
                 yaml_contents = None
@@ -142,7 +137,7 @@ def load_yaml_value(path, key):
             if key == "github_token":
                 val = getpass.getpass(prompt=(prompt % key))
             else:
-                val = str(input(prompt % key))
+                val = str(raw_input(prompt % key))
             if re.sub('"', '', re.sub('\'', '', val.lower())) == "none":
                 val = None
             f.write('%s: %s\n' % (key, val))
@@ -190,13 +185,13 @@ def get_executable(language_name, manual_executables = {}):
     }
     lower_name = language_name.lower().strip()
     manual_executables = {str(k).lower().strip(): str(v).lower().strip() 
-                          for k, v in list(manual_executables.items())}
-    manual_executables = {k: v for k, v in list(manual_executables.items()) 
+                          for k, v in manual_executables.items()}
+    manual_executables = {k: v for k, v in manual_executables.items() 
                           if k and v and v not in ['none', 'no', 'false', 'n', 'f']}
     try:
         executable = manual_executables[lower_name]
     except KeyError:
-        has_default_executable = lower_name in list(default_executables.keys())
+        has_default_executable = lower_name in default_executables.keys()
         if not has_default_executable:
             error_message = 'Cannot find default executable for language: %s. ' \
                             'Try specifying a default.' % language_name
@@ -236,11 +231,10 @@ def finder(rel_parent_dir, pattern, excluded_dirs=[]):
                 command, os.path.normpath(x))
 
     try:
-        out_paths = subprocess.check_output(
-            command, shell=True).replace('\r\n', '\n')
+        out_paths = str(subprocess.check_output(command, shell=True).replace(b'\r\n', b'\n'))
         out_paths = out_paths.split('\n')
         # Strip paths and keep non-empty
-        out_paths = list(filter(bool, list(map(str.strip, out_paths))))
+        out_paths = filter(bool, map(str.strip, out_paths))
         out_paths = fnmatch.filter(out_paths, pattern)
     except subprocess.CalledProcessError:
         out_paths = []
@@ -254,14 +248,14 @@ def add_two_dict_keys(d = {}, common_key = '', key1 = 'global', key2 = 'user'):
     Overwrites repeated values at key1 by key2.
     '''
     try:
-        items1 = list(d[key1][common_key].items())
+        items1 = d[key1][common_key]
     except (KeyError, TypeError):
-        items1 = []
+        items1 = {}
     try:
-        items2 = list(d[key2][common_key].items())
+        items2 = d[key2][common_key]
     except (KeyError, TypeError):
-        items2 = []
-    items = dict(items1 + items2)
+        items2 = {}
+    items = {**items1, **items2}
     if not items:
         message = 'Inappropriate input values: `d` must be a dictionary, and ' \
                   'at least one of `d[%s][%s]` and `d[%s][%s]` ' \
@@ -305,8 +299,8 @@ def flatten_dict(d, parent_key = '', sep = ':',
                 pass
             skip_keys += (new_key,)
         try: # Recursive case
-            items.extend(list(flatten_dict(val, parent_key = new_key, 
-                                      skip_keys = skip_keys).items()))
+            items.extend(flatten_dict(val, parent_key = new_key, 
+                                      skip_keys = skip_keys).items())
         except AttributeError: # Base case
             items.append((new_key, val))
     return dict(items)

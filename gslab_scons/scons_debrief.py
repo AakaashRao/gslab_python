@@ -1,8 +1,5 @@
 from __future__ import division
-from __future__ import print_function
 
-from builtins import input
-from builtins import str
 import os
 import re
 import sys
@@ -38,19 +35,21 @@ def scons_debrief(args, cl_args_list = sys.argv):
 
 
 def state_of_repo(maxit, outfile='state_of_repo.log'):
-    with open(outfile, 'wb') as f:
-        f.write("WARNING: Information about .sconsign.dblite may be misleading\n" +
-                "as it can be edited after state_of_repo.log finishes running\n\n" +
-                misc.make_heading("GIT STATUS"))
+    with open(outfile, 'w') as f:
+        
+        writeout = "WARNING: Information about .sconsign.dblite may be misleading\n" +\
+                    "as it can be edited after state_of_repo.log finishes running\n\n" +\
+                    misc.make_heading("GIT STATUS")
+        f.write(writeout)
         f.write("Last commit:\n\n")
 
     # https://stackoverflow.com/questions/876239/how-can-i-redirect-and-append-both-stdout-and-stderr-to-a-file-with-bash
     os.system("git log -n 1 >> state_of_repo.log 2>&1")
-    with open(outfile, 'ab') as f:
+    with open(outfile, 'a') as f:
         f.write("\n\nFiles changed since last commit:\n\n\n")
     os.system("git diff --name-only >> state_of_repo.log 2>&1")
 
-    with open(outfile, 'ab') as f:
+    with open(outfile, 'a') as f:
         f.write('\n%s' % misc.make_heading("FILE STATUS"))
         for root, dirs, files in os.walk(".", followlinks=True):
             i = 1
@@ -75,7 +74,7 @@ def state_of_repo(maxit, outfile='state_of_repo.log'):
 def issue_size_warnings(look_in = ['source', 'raw', 'release'],
                         file_MB_limit_lfs = 2, total_MB_limit_lfs = 500, 
                         file_MB_limit = 0.5, total_MB_limit = 125,
-                        lfs_required = True, git_attrib_path = '../.gitattributes'):
+                        lfs_required = True, git_attrib_path = '.gitattributes'):
     '''
     This function issues warnings for large versioned files with different upper limits 
     depending on whether the user has git-lfs or not. In addition, if the user has git-lfs
@@ -86,7 +85,7 @@ def issue_size_warnings(look_in = ['source', 'raw', 'release'],
     # Compile a list of files that are not versioned.
     ignored     = list_ignored_files(look_in)
     versioned   = create_size_dictionary(look_in)
-    versioned   = {k: versioned[k] for k in list(versioned.keys()) if k not in ignored}
+    versioned   = {k: versioned[k] for k in versioned.keys() if k not in ignored}
     
     # different limits 
     limit_file_lfs  = file_MB_limit_lfs  * bytes_in_MB
@@ -100,7 +99,7 @@ def issue_size_warnings(look_in = ['source', 'raw', 'release'],
     new_add_list = []
 
     if lfs_required:
-        for file_name in list(versioned.keys()):
+        for file_name in versioned.keys():
             size  = versioned[file_name]
 
             # the case where there exists some large versoned file not tracked by git-lfs
@@ -113,7 +112,7 @@ def issue_size_warnings(look_in = ['source', 'raw', 'release'],
                 print(_red_and_bold("Warning:") + \
                       " the versioned file %s "  % file_name  + \
                       "(size: %.02f MB)\n\t"     % size_in_MB + \
-                      "is larger than %.02f MB." % file_MB_limit_lfs)
+                      "is larger than %.02f MB.") % file_MB_limit_lfs
                 print("Versioning files of this size is discouraged.\n")
 
         # see if the directory size exceeds the given limit
@@ -123,7 +122,7 @@ def issue_size_warnings(look_in = ['source', 'raw', 'release'],
                   " the total size of versioned files " + \
                   "in the directories %s\n\tis "      % str(look_in) + \
                   "%.02f MB, which exceeds "          % total_size_in_MB + \
-                  "our recommended limit of %f.02 MB" % total_MB_limit_lfs)
+                  "our recommended limit of %f.02 MB") % total_MB_limit_lfs
             print("Versioning this much content is discouraged.\n")
 
         # if there are large versioned files not tracked by git-lfs, warned the user and perform tracking if the user agrees 
@@ -132,21 +131,21 @@ def issue_size_warnings(look_in = ['source', 'raw', 'release'],
             " the following files are versioned large files that " + \
             "are not tracked by git-lfs (recommend using git-lfs to track them): ") 
             print('\n'.join(new_add_list))
-            decision = input("Enter 'y' to automatically track these with git-lfs: ")
+            decision = raw_input("Enter 'y' to automatically track these with git-lfs: ")
             if decision == 'y':
                 for file in new_add_list:
                     add_to_lfs(file, git_attrib_path)
 
     else:
         # see if a file's size exceeds the given limit
-        for file_name in list(versioned.keys()):
+        for file_name in versioned.keys():
             size  = versioned[file_name]
             if size > limit_file:
                 size_in_MB = size / bytes_in_MB
                 print(_red_and_bold("Warning:") + \
                       " the versioned file %s "  % file_name  + \
                       "(size: %.02f MB)\n\t"     % size_in_MB + \
-                      "is larger than %.02f MB." % file_MB_limit)
+                      "is larger than %.02f MB.") % file_MB_limit
                 print("Versioning files of this size is discouraged.")
                 print("Consider using git-lfs for versioning large files.\n")
 
@@ -181,11 +180,11 @@ def list_ignored_files(look_in):
     '''
     # Produce a listing of files and directories ignored by git
     message = subprocess.check_output('git status --ignored', shell = True)
-    message = message.split('\n')
-    message = [s.strip() for s in message]
+    message = message.split(b'\n')
+    message = list(map(lambda s: s.strip(), message))
 
     try:
-        ignored_line = message.index('Ignored files:')
+        ignored_line = message.index(b'Untracked files:')
     except ValueError:
         # If the git status message lists no ignored files, return empty list
         return []
@@ -195,7 +194,7 @@ def list_ignored_files(look_in):
     ignore_dirs  = []
     ignore_files = []
     for line in message[ignored_line:len(message)]:
-        as_path = os.path.normpath(line)
+        as_path = str(os.path.normpath(line))
 
         # Only check for ignored files in the specified "look_in" directories
         superpaths = [d for d in look_in if _is_subpath(as_path, d)]
@@ -248,7 +247,7 @@ def create_size_dictionary(dirs):
 
     return size_dictionary
 
-def check_track_lfs(filepath, attrib_path = '../.gitattributes'):
+def check_track_lfs(filepath, attrib_path = '.gitattributes'):
     '''
     This function checks if a given file is tracked by git lfs. 
     It iterates everyline in .gitattributes and checks if the file 
@@ -265,7 +264,7 @@ def check_track_lfs(filepath, attrib_path = '../.gitattributes'):
         return False
     return True
 
-def add_to_lfs(filepath, attrib_path = '../.gitattributes'):
+def add_to_lfs(filepath, attrib_path = '.gitattributes'):
     '''
     This function tracks existing files with git lfs by writing down 
     the given file path to the .gitattributes.

@@ -9,7 +9,7 @@ import argparse
 import types
 import traceback
 from . import textfill_info
-from html.parser import HTMLParser, HTMLParseError
+from html.parser import HTMLParser
 
 
 def textfill(**kwargs):
@@ -107,7 +107,8 @@ class text_parser(HTMLParser):
     def close(self):
         for tag in list(self.results.keys()):
             if tag not in self.closed:
-                raise HTMLParseError('Tag %s is not closed' % tag)
+                print('Tag %s is not closed' % tag)
+                raise 
 
 
 def clean_text(text, remove_echoes):

@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-from builtins import str
 import sys
 import subprocess
 import pkg_resources
@@ -22,9 +20,6 @@ def check_prereq(prereq, manual_execs = {}, gslab_vers = None):
         if not misc.is_in_path(executable):
             message = 'Cannot find executable for %s in PATH.' % prereq_clean
             raise PrerequisiteError(message)
-    elif prereq_clean == 'python':
-        if sys.version_info[0] != 2:
-            raise PrerequisiteError('Please use Python 2')
     elif prereq_clean == 'gslab_python':
         required_version  = process_gslab_version(gslab_vers)
         installed_version = pkg_resources.get_distribution('gslab_tools').version
@@ -36,9 +31,6 @@ def check_prereq(prereq, manual_execs = {}, gslab_vers = None):
             raise PrerequisiteError(message)
     elif prereq_clean == 'git_lfs':
         check_git_lfs()
-    else:
-        message = 'Cannot find prerequisite check for %s' % prereq
-        raise PrerequisiteError(message)
     return None
 
 

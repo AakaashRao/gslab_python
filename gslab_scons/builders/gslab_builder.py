@@ -1,5 +1,3 @@
-from builtins import str
-from builtins import object
 import abc
 import os
 import subprocess
@@ -7,12 +5,12 @@ import sys
 
 import gslab_scons.misc as misc
 from gslab_scons._exception_classes import ExecCallError, TargetNonexistenceError, BadExtensionError
-from future.utils import with_metaclass
 
-class GSLabBuilder(with_metaclass(abc.ABCMeta, object)):
+class GSLabBuilder(object):
     '''
     Abstract Base Class for custom GSLab SCons builders.
     '''
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, target, source, env, name = 'GSLab Builder', 
                  valid_extensions = [], exec_opts = ''):
@@ -190,6 +188,6 @@ class GSLabBuilder(with_metaclass(abc.ABCMeta, object)):
             builder_log_msg = '*** Builder log created: {%s}\n' \
                               '*** Builder log completed: {%s}\n%s' \
                               % (start_time, end_time, content)
-        with open(self.log_file, mode = 'wb') as f:
+        with open(self.log_file, mode = 'w') as f:
             f.write(builder_log_msg)
         return None

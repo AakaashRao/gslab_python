@@ -20,7 +20,7 @@ def start_log(mode, cl_args_list = sys.argv, log = 'sconstruct.log'):
         f.write(start_message)
 
     if misc.is_unix():
-        sys.stdout = os.popen('tee -a %s' % log, 'wb')
+        sys.stdout = os.popen('tee -a %s' % log, 'w')
     elif sys.platform == 'win32':
         sys.stdout = open(log, 'ab')
 
@@ -51,7 +51,7 @@ def end_log(cl_args_list = sys.argv, log = 'sconstruct.log', excluded_dirs = [],
     
     # keep only builder logs from this run OR is broken (value == beginning_of_time)
     beginning_of_time    = datetime.min # to catch broken logs (see collect_builder_logs)
-    this_run_dict = {key:value for key, value in list(builder_logs.items()) if (value > start_time) or value == beginning_of_time}
+    this_run_dict = {key:value for key, value in builder_logs.items() if (value > start_time) or value == beginning_of_time}
     this_run_list = sorted(this_run_dict, key=this_run_dict.get, reverse=True)
 
     with open(log, "a") as sconstruct:

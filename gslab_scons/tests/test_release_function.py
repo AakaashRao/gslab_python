@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-from past.builtins import basestring
 import unittest
 import sys
 import os
@@ -9,8 +7,8 @@ import shutil
 import requests
 import copy
 # Import modules containing gslab_scons test helper functions
-from . import _test_helpers as helpers
-from . import _side_effects as fx
+import _test_helpers as helpers
+import _side_effects as fx
 
 # Ensure that Python can find and load the GSLab libraries
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -315,7 +313,7 @@ class TestReleaseFunction(unittest.TestCase):
         '''
         test_args = copy.deepcopy(standard_args)
 
-        for changed_arg in list(changes.keys()):
+        for changed_arg in changes.keys():
             test_args[changed_arg] = changes[changed_arg]
 
         with self.assertRaises(expected_error):
